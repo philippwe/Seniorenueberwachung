@@ -11,13 +11,12 @@ try:
         
         print "Test"
         #Pfad des Ordners angeben, in dem die Fotos von Motion abgespeichert werden
-        objects = os.listdir('C:\Users\philipp.wilken\Documents\GitHub\Seniorenueberwachung\code\Skripte')
+        #objects = os.listdir('C:\Users\philipp.wilken\Documents\GitHub\Seniorenueberwachung\code\Skripte')
+        objects = os.listdir('C:\Users\d056973\Documents')
 # objects.sort()
 # for objectname in objects:
-#  print(objectname)
-        
-        
-        
+#  print(objectname)   
+                
         curr_anzahl = len(objects)
         if anzahl == 0:
             anzahl = curr_anzahl
@@ -33,6 +32,10 @@ try:
             os.system("Signalton.py 1")
         
         time.sleep(1)
+        
+    if (time.localtime()[4]%10)==5:
+        os.system("delete.py")
+        
 except KeyboardInterrupt:
     print ("Programm beendet")
     
