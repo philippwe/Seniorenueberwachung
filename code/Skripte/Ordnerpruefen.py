@@ -28,14 +28,16 @@ try:
         else:
             counter = counter +1
             print counter
-        if counter == 30:
+        if counter == 10:  #30
             counter = 0
-            import Signalton
+            #import Signalton
+            import Email
         
         time.sleep(1)
         
     if (time.localtime()[4]%10)==5:
         import delete
+        anzahl = len(objects)
         
 except KeyboardInterrupt:
     print ("Programm beendet")
