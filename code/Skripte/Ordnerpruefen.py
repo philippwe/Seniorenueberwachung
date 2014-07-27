@@ -6,6 +6,14 @@ curr_anzahl = 0
 anzahl = 0
 counter = 0
 
+s = []
+fobj = open ("/var/www/Konfiguration.txt" , 'r') 
+for line in fobj: 
+	s.append(line)    
+fobj.close()
+
+countmax = s[2]
+
 try:
     while True:
         
@@ -28,7 +36,7 @@ try:
         else:
             counter = counter +1
             print counter
-        if counter == 10:  #30
+        if counter == countmax: #10:  #30
             counter = 0
             #import Signalton
             import Email
