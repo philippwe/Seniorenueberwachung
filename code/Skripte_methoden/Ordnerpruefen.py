@@ -4,11 +4,12 @@ def ueberwachen():
 	import sys
 	import os
 	import Email
+	import delete
 	
 	curr_anzahl = 0
 	anzahl = 0
 	counter = 0
-	
+	deleteImages = 1
 	#Ueberwachungsdauer auslesen
 	
 	s = []
@@ -43,14 +44,18 @@ def ueberwachen():
 				
 			if counter == countmax:  #10:  #30
 				counter = 0
-				#import Signalton
+				#Signalton.output()
 				Email.sendMail()
 				
 			time.sleep(1)
-
+			
 			if (time.localtime()[4]%10)==5:
-				import delete
-				anzahl = len(objects)
+				if deleteImages == 1:
+					deleteImages = 0
+					delete.cleanup(10)
+					anzahl = len(objects)
+			else:
+				deleteImages = 1
 			
 	except KeyboardInterrupt:
 		print ("Programm beendet")

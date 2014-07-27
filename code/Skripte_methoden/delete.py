@@ -1,6 +1,5 @@
 def cleanup(n):   
-#für Werte zwischen 0 und 60
-    
+#fuer Werte zwischen 0 und 60
     import glob
     import os
     import time
