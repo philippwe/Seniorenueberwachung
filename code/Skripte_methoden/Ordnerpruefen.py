@@ -5,6 +5,7 @@ def ueberwachen():
 	import os
 	import Email
 	import delete
+	import control
 	
 	curr_anzahl = 0
 	anzahl = 0
@@ -56,6 +57,10 @@ def ueberwachen():
 					anzahl = len(objects)
 			else:
 				deleteImages = 1
+				
+			sleepTime = control.userInput()
+			time.sleep(sleepTime)
+			# hier kommt die pixel-methode rein
 			
 	except KeyboardInterrupt:
 		print ("Programm beendet")
