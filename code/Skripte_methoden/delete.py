@@ -77,3 +77,10 @@ def cleanup(n):
     
     for fl in glob.glob(pfad):
         os.remove(fl)
+        
+def cleanAll(pfad):
+    import glob
+    import os
+    for fl in glob.glob(pfad+"*.jpg"):
+    #Do what you want with the file
+        os.remove(fl)

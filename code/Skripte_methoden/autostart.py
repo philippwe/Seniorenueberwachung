@@ -10,7 +10,7 @@ os.system('sudo /etc/init.d/motion start')
 Signalton.output('motionAktiviert')
 
 #1.) /srv/motion leeren
-delete.cleanAll("/srv/motion/*.jpg")
+delete.cleanAll('/srv/motion/')
 
 #2.) Ordnerpruefen ausfuehren
 Ordnerpruefen.ueberwachen()
