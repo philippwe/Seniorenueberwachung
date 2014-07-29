@@ -3,16 +3,18 @@ def ueberwachen():
 	import time
 	import sys
 	import os
-	import Email
-	import delete
-	import control
+	import Email	 #Email.py
+	import delete    #delete.py
+	import control   #control.py
+	import Signalton #Signalton.py
 	
 	curr_anzahl = 0
 	anzahl = 0
 	counter = 0
 	deleteImages = 1
-	#Ueberwachungsdauer auslesen
+	pause = 0
 	
+	#Ueberwachungsdauer auslesen
 	s = []
 	fobj = open ("/var/www/Konfiguration.txt" , 'r') 
 	for line in fobj: 
@@ -20,6 +22,8 @@ def ueberwachen():
 	fobj.close()
 	
 	countmax = int(s[1].strip())  #entfernt leerzeichen
+	
+	#Ordner auf Veraenderungen ueberpruefen -> bei Bewegung wird ein neues Bild hinzugefuegt
 	
 	try:
 		while True:
@@ -45,8 +49,10 @@ def ueberwachen():
 				
 			if counter == countmax:  #10:  #30
 				counter = 0
-				#Signalton.output()
+				Signalton.output("keineBewegung")
+				time.sleep(30)
 				Email.sendMail()
+				pausse = 1
 				
 			time.sleep(1)
 			
@@ -56,11 +62,22 @@ def ueberwachen():
 					delete.cleanup(10)
 					anzahl = len(objects)
 			else:
-				deleteImages = 1
-				
-			sleepTime = control.userInput()
-			time.sleep(sleepTime)
-			# hier kommt die pixel-methode rein
+				deleteImages = 1   #damit nicht eine minute lang bei jedem schleifendurchlauf geloescht wird
+			
+			#if roteKarte()==1:  
+			#	pause = 1
+			#   Signalton.output('pause')
+			
+			if (pause == 1):       #bei ausgelöstem alarm oder unterbrechung durch rote karte soll der zähler nicht weiterlaufen. hier wird er deshalb unterbrochen
+			#sleepTime = control.userInput()
+			#time.sleep(sleepTime)
+				while True:
+					action = input("Diese Aussage ist falsch! Stimmt das oder nicht? (y/n) ")
+					#var = pixelmethode()
+					if input == "y":
+						Signalton.output('ueberwachungAktiviert')
+						break
+						# hier könnte nochmals eine Mail an alle rausgeschickt werden. Beispielsweise bei einem Fehlalarm			
 			
 	except KeyboardInterrupt:
 		print ("Programm beendet")
