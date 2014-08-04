@@ -16,7 +16,7 @@ def ueberwachen():
 	
 	#Ueberwachungsdauer auslesen
 	s = []
-	fobj = open ("/var/www/Konfiguration.txt" , 'r') 
+	fobj = open ("/var/www/Konfiguration.txt" , "r") 
 	for line in fobj: 
 		s.append(line)    
 	fobj.close()
@@ -29,7 +29,7 @@ def ueberwachen():
 		while True:
 			#Pfad des Ordners angeben, in dem die Fotos von Motion abgespeichert werden
 			#= os.listdir('C:\Users\philipp.wilken\Documents\GitHub\Seniorenueberwachung\code\Skripte')
-			objects = os.listdir('/srv/motion/')
+			objects = os.listdir("/srv/motion/")
 				
 	# objects.sort()
 	# for objectname in objects:
@@ -75,7 +75,7 @@ def ueberwachen():
 					action = input("Diese Aussage ist falsch! Stimmt das oder nicht? (y/n) ")
 					#var = pixelmethode()
 					if input == "y":
-						Signalton.output('ueberwachungAktiviert')
+						Signalton.output("ueberwachungAktiviert")
 						break
 						# hier könnte nochmals eine Mail an alle rausgeschickt werden. Beispielsweise bei einem Fehlalarm			
 			
