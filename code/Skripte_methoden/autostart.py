@@ -9,8 +9,10 @@ os.system("sudo /etc/init.d/motion start")
 
 Signalton.output("motionAktiviert")
 
+# path to images captured by motion
+path = "/srv/motion/"   
 #1.) /srv/motion leeren
-delete.cleanAll("/srv/motion/")
+delete.cleanAll(path)
 
 #2.) Ordnerpruefen ausfuehren
-Ordnerpruefen.ueberwachen()
+Ordnerpruefen.ueberwachen(path)

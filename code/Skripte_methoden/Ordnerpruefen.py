@@ -1,4 +1,13 @@
-def ueberwachen():
+def getNewest(pfad):
+
+    import os
+    import glob
+
+    newest = max(glob.iglob(pfad+"*.*"), key = os.path.getctime)
+
+    return newest
+
+def ueberwachen(pfad):
 	
 	import time
 	import sys
@@ -29,7 +38,7 @@ def ueberwachen():
 		while True:
 			#Pfad des Ordners angeben, in dem die Fotos von Motion abgespeichert werden
 			#= os.listdir('C:\Users\philipp.wilken\Documents\GitHub\Seniorenueberwachung\code\Skripte')
-			objects = os.listdir("/srv/motion/")
+			objects = os.listdir(pfad)
 				
 	# objects.sort()
 	# for objectname in objects:
@@ -63,6 +72,9 @@ def ueberwachen():
 					anzahl = len(objects)
 			else:
 				deleteImages = 1   #damit nicht eine minute lang bei jedem schleifendurchlauf geloescht wird
+			
+			
+			newest = getNewest(pfad)
 			
 			#if roteKarte()==1:  
 			#	pause = 1
