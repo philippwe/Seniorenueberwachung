@@ -1,7 +1,7 @@
 import os
 import delete
 import Signalton
-import Ordnerpruefen
+import Hauptprogramm
 
 #0.) motion starten
 os.system("sudo /etc/init.d/motion stop")
@@ -15,4 +15,4 @@ path = "/srv/motion/"
 delete.cleanAll(path)
 
 #2.) Ordnerpruefen ausfuehren
-Ordnerpruefen.ueberwachen(path)
+Hauptprogramm.ueberwachen(path)

@@ -1,3 +1,9 @@
+def getRecipient():
+	pass #todo
+
+def getName():
+	pass #todo
+
 def sendMail():
 
 	import smtplib

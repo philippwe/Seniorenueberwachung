@@ -1,4 +1,4 @@
-def cleanup(n):   
+def cleanup(iv_period):   
 #fuer Werte zwischen 0 und 60
     import glob
     import os
@@ -10,10 +10,10 @@ def cleanup(n):
     hour = time.localtime()[3]
     minute = time.localtime()[4]
 
-    if minute>=n:
-        minute = minute-n
+    if minute>=iv_period:
+        minute = minute-iv_period
     else:
-        minute = minute+(60-n)
+        minute = minute+(60-iv_period)
         if hour>=1:
             hour = hour-1
         else:
@@ -73,7 +73,7 @@ def cleanup(n):
     
     pfad = "/srv/motion/*"+year+month+day+hour+minute+"*"
     
-    print pfad
+    print pfad #TODO entfernen
     
     for fl in glob.glob(pfad):
         os.remove(fl)
