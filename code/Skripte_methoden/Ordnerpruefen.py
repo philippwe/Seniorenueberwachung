@@ -2,11 +2,13 @@ def getNewest(pfad):
 
     import os
     import glob
-
-    newest = max(glob.iglob(pfad+"*.*"), key = os.path.getctime)
-
+    try:
+        newest = max(glob.iglob(pfad+"/*.*"), key = os.path.getctime)
+    except ValueError:
+        return 0
+    
     return newest
-
+   
 def ueberwachen(pfad):
 	
 	import time
@@ -31,19 +33,17 @@ def ueberwachen(pfad):
 	fobj.close()
 	
 	countmax = int(s[1].strip())  #entfernt leerzeichen
-	
+	print countmax
+    
 	#Ordner auf Veraenderungen ueberpruefen -> bei Bewegung wird ein neues Bild hinzugefuegt
-	
+	#todo: eigene methode "bewegung pruefen"
 	try:
 		while True:
 			#Pfad des Ordners angeben, in dem die Fotos von Motion abgespeichert werden
 			#= os.listdir('C:\Users\philipp.wilken\Documents\GitHub\Seniorenueberwachung\code\Skripte')
+	
 			objects = os.listdir(pfad)
-				
-	# objects.sort()
-	# for objectname in objects:
-	#  print(objectname)   
-
+	
 			curr_anzahl = len(objects)
 			
 			if anzahl == 0:
@@ -54,16 +54,23 @@ def ueberwachen(pfad):
 				anzahl = curr_anzahl
 			else:
 				counter = counter +1
-				print counter
+				print counter #todo noch entfernen
 				
 			if counter == countmax:  #10:  #30
 				counter = 0
 				Signalton.output("keineBewegung")
-				time.sleep(30)
-				Email.sendMail()
-				pausse = 1
 				
-			time.sleep(1)
+				time.sleep(30)
+				s = 0
+				if s <= 30:
+					s = s+1	
+					time.sleep(1) 
+					#todo bewegung pruefen
+				else:
+					Email.sendMail()
+					pause = 1
+				
+			#time.sleep(1)
 			
 			if (time.localtime()[4]%10)==5:
 				if deleteImages == 1:
@@ -75,12 +82,14 @@ def ueberwachen(pfad):
 			
 			
 			newest = getNewest(pfad)
-			
-			#if roteKarte()==1:  
-			#	pause = 1
-			#   Signalton.output('pause')
-			
-			if (pause == 1):       #bei ausgelöstem alarm oder unterbrechung durch rote karte soll der zähler nicht weiterlaufen. hier wird er deshalb unterbrochen
+
+			if (newest != 0):
+				break
+				#if roteKarte()==1:  
+				#	pause = 1
+				#   Signalton.output('pause')
+
+			if (pause == 1):       #bei ausgeloestem alarm oder unterbrechung durch rote karte soll der zaehler nicht weiterlaufen. hier wird er deshalb unterbrochen
 			#sleepTime = control.userInput()
 			#time.sleep(sleepTime)
 				while True:
@@ -89,11 +98,12 @@ def ueberwachen(pfad):
 					if input == "y":
 						Signalton.output("ueberwachungAktiviert")
 						break
-						# hier könnte nochmals eine Mail an alle rausgeschickt werden. Beispielsweise bei einem Fehlalarm			
-			
+						# hier koennte nochmals eine Mail an alle rausgeschickt werden. Beispielsweise bei einem Fehlalarm	
+
 	except KeyboardInterrupt:
 		print ("Programm beendet")
 		
 	except:
 		print ("Fehler:" +str(sys.exc_info()[0]))
 		raise
+		
