@@ -19,4 +19,3 @@ def timer(n):
 
 	time.sleep(n)
 	return "0"
-

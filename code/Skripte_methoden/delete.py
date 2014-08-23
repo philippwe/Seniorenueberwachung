@@ -73,7 +73,7 @@ def cleanup(iv_period):
     
     pfad = "/srv/motion/*"+year+month+day+hour+minute+"*"
     
-    print pfad #TODO entfernen
+    print "--------------- deleting old files" #TODO entfernen
     
     for fl in glob.glob(pfad):
         os.remove(fl)

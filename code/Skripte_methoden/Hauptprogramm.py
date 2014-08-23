@@ -4,6 +4,7 @@
 
 gv_stopCheckChange = 0
 gv_stopCheckCard = 0
+gv_stopCheckChangeConfirm = 0
 
 gv_checkChangeReturn = 0
 gv_checkCardReturn = 0  #0 = nichts, 1=rot, 2=gelb
@@ -11,6 +12,7 @@ gv_checkCardReturn = 0  #0 = nichts, 1=rot, 2=gelb
 gv_deleteImages = 1
 
 def getCheckTime():  #liest den Zeitraum aus, in welcher sich die ueberwachte Person bewegen muss
+	
 	s = []
 	fobj = open ("/var/www/Konfiguration.txt" , "r") 
 	for line in fobj: 
@@ -31,7 +33,8 @@ def getNewest(iv_path):
 
 	return newest
 
-def checkChange(iv_counter, iv_pfad, iv_deletePeriod):  #ueberprueft ob dateien dazu gekommen sind und loescht regelmaessig alte bilder
+def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob dateien dazu gekommen sind und loescht regelmaessig alte bilder
+	
 	import os
 	import time
 	import delete #Delete.py
@@ -40,13 +43,18 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod):  #ueberprueft ob dateien 
 	anzahl = 0
 	counter = 0
 	
+	global gv_stopCheckChangeConfirm
 	global gv_checkChangeReturn
-	gv_checkChangeReturn = 0
-	
+	global gv_stopCheckChange
 	global gv_deleteImages
 	
+	gv_stopCheckChange = 0
+	gv_stopCheckChangeConfirm = 0
+	gv_checkChangeReturn = 0
+	
 	#Ordner auf Veraenderungen ueberpruefen -> bei Bewegung wird ein neues Bild hinzugefuegt
-	while (gv_checkChangeReturn == 0):
+	while (gv_checkChangeReturn == 0) and (gv_stopCheckChange == 0):
+				
 		time.sleep(1)
 		objects = os.listdir(iv_pfad)
 		curr_anzahl = len(objects)
@@ -59,8 +67,8 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod):  #ueberprueft ob dateien 
 			anzahl = curr_anzahl
 		else:
 			counter = counter +1
-			print "t1: "+str(counter) #todo noch entfernen
-		
+			print id+": "+str(counter) #todo noch entfernen
+			
 		if counter == iv_counter:  #10:  #30	
 			gv_checkChangeReturn = 1 #lange zeit keine bewegung -> benachrichtigung
 
@@ -72,9 +80,11 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod):  #ueberprueft ob dateien 
 		else:
 				gv_deleteImages = 1   #damit nicht eine minute lang bei jedem schleifendurchlauf geloescht wird
 		
-		if (gv_stopCheckChange == 1):  #stop von aussen
-			break	
-
+	print "--------------- returning from checkChange"
+	
+	gv_stopCheckChangeConfirm = 1
+	return
+	
 def checkCard(iv_path): #return: 0 = nichts; 1 = rot; 2 = gelb;
 	
 	while (gv_stopCheckCard == 0):
@@ -97,39 +107,52 @@ def ueberwachen(iv_path):  #main
 	#Ueberwachungsdauer auslesen
 	countmax = getCheckTime()
 	
+	global gv_stopCheckChange
 	global gv_checkChangeReturn	
-	bewegungsAufforderung = 0
+	global gv_stopCheckChangeConfirm
+	
 	alarmMailSent = 0	
 	
 	try: 
-		thread.start_new_thread(checkChange, (countmax, iv_path, 10))
+		thread.start_new_thread(checkChange, (countmax, iv_path, 10, "anfang"))
 		thread.start_new_thread(checkCard, (iv_path,))
-			
+		
 		while True:
-		#wenn nachricht von checkKarte: stop checkmotion
-		#wenn erneut nachricht von checkKarte: start checkmotion
-			if (gv_checkChangeReturn == 1) and (bewegungsAufforderung == 0): #alarm
-				#hier ist der thread fuer checkChange schon durchgelaufen
-				print "keine bewegung"
+
+			if (gv_checkChangeReturn == 1): #alarm
+				#hier ist der thread fuer checkChange schon durchgelaufen und beendet
+				print "--------------- keine bewegung"
 				Signalton.output("keineBewegung") #Aufforderung sich zu bewegen
-				thread.start_new_thread(checkChange, (20, iv_path, 10)) #1 thread
-				time.sleep(30)
-				#c = 0
-				#while (c<=30):
+				
+				while (gv_stopCheckChangeConfirm == 0):
+					pass   #damit der thread auch wirklich beendet ist
+								
+				thread.start_new_thread(checkChange, (25, iv_path, 10, "keine bewegung")) #1 thread
+				#time.sleep(30)
+				c = 0
+				while (c<=30):
 				#	print "t0: "+str(c)
-				#	c = c+1
-				#	time.sleep(1)
+					c = c+1
+					time.sleep(1)
 					
 				if (gv_checkChangeReturn == 1): #wenn in der Zeit keine Bewegung erfolgt ist
-					#Signalton.output("mailVersendet")
+					
 					gv_stopCheckChange = 1  #1 thread gestoppt -> 0 threads
+					while (gv_stopCheckChangeConfirm == 0):
+						pass
+										
 					Email.sendMail()
 					alarmMailSent = 1
-					gv_checkChangeReturn = 0
+					#Signalton.output("mailVersendet")
+					
+					gv_checkChangeReturn = 0  #hier wird nicht mehr auf bewegung ueberprueft, da bereits ein alarm abgeschickt wurde
 				else:
 					gv_stopCheckChange = 1
-					time.sleep(3)
-					thread.start_new_thread(checkChange, (countmax, iv_path, 10))
+					print "gv_stopCheckChange = 1"
+					while (gv_stopCheckChangeConfirm == 0):
+						pass
+					
+					thread.start_new_thread(checkChange, (countmax, iv_path, 10, "abbruch/anfang"))
 			
 			#if (gv_checkCardReturn == 2) and (alarmMailSent == 1):  #wenn eine gelbe karte vorgehalten wird, wird der alarm unterbrochen
 				#thread.start_new_thread(checkChange, countmax, iv_path)
