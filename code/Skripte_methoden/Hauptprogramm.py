@@ -2,16 +2,16 @@
 
 #Auf diese koennen die Methoden zugreifen
 
-gv_stopCheckChange = 0
 gv_stopCheckCard = 0
+gv_stopCheckChange = 0
 gv_stopCheckChangeConfirm = 0
+gv_stopPeriodicCleanup = 0
+gv_stopPeriodicCleanupConfirm = 0
 
 gv_checkChangeReturn = 0
 gv_checkCardReturn = 0  #0 = nichts, 1=rot, 2=gelb
 
 gv_newImage = 0
-
-gv_deleteImages = 1
 
 def getCheckTime():  #liest den Zeitraum aus, in welcher sich die ueberwachte Person bewegen muss
 	
@@ -35,12 +35,11 @@ def getNewest(iv_path):
 
 	return newest
 
-def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob dateien dazu gekommen sind und loescht regelmaessig alte bilder
+def checkChange(iv_counter, iv_pfad, id):  #ueberprueft ob dateien dazu gekommen sind und loescht regelmaessig alte bilder
 	
 	import os
 	import time
-	import delete #Delete.py
-	
+
 	curr_anzahl = 0
 	anzahl = 0
 	counter = 0
@@ -48,7 +47,6 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob date
 	global gv_stopCheckChangeConfirm
 	global gv_checkChangeReturn
 	global gv_stopCheckChange
-	global gv_deleteImages
 	global gv_newImage
 	
 	gv_stopCheckChange = 0
@@ -64,7 +62,10 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob date
 			
 		if anzahl == 0:
 			anzahl = curr_anzahl
-
+		#fuer den fall, dass bilder geloescht wurden
+		if curr_anzahl < anzahl:
+			anzahl = curr_anzahl
+			
 		if curr_anzahl > anzahl:
 			counter = 0
 			anzahl = curr_anzahl
@@ -76,19 +77,30 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob date
 		if counter == iv_counter:  #10:  #30	
 			gv_checkChangeReturn = 1 #lange zeit keine bewegung -> benachrichtigung
 
-		if (time.localtime()[4]%10)==5:
-			if gv_deleteImages == 1:
-				gv_deleteImages = 0
-				delete.cleanup(iv_deletePeriod)
-				anzahl = len(objects)
-		else:
-				gv_deleteImages = 1   #damit nicht eine minute lang bei jedem schleifendurchlauf geloescht wird
-		
 	print "--------------- returning from checkChange"
 	
 	gv_stopCheckChangeConfirm = 1
 	return
 	
+def periodicCleanup(iv_deletePeriod):
+
+	import delete
+	import time
+
+	global gv_stopPeriodicCleanup
+	global gv_stopPeriodicCleanupConfirm
+	gv_stopPeriodicCleanupConfirm = 0
+	gv_stopPeriodicCleanup = 0
+	
+	while (gv_stopPeriodicCleanup == 0):
+		
+		if (time.localtime()[4]%10)==5:
+			delete.cleanup(iv_deletePeriod)
+			time.sleep(60)
+			
+	gv_stopPeriodicCleanupConfirm = 1
+	return
+
 def checkCard(iv_path): #return: 0 = nichts; 1 = rot; 2 = gelb;
 	
 	while (gv_stopCheckCard == 0):
@@ -120,8 +132,9 @@ def ueberwachen(iv_path):  #main
 	alarmMailSent = 0	
 	
 	try: 
-		thread.start_new_thread(checkChange, (countmax, iv_path, 10, "anfang"))
+		thread.start_new_thread(checkChange, (countmax, iv_path, "anfang"))
 		thread.start_new_thread(checkCard, (iv_path,))
+		thread.start_new_thread(periodicCleanup, (10,))
 		
 		while True:
 
@@ -133,7 +146,7 @@ def ueberwachen(iv_path):  #main
 				while (gv_stopCheckChangeConfirm == 0):
 					pass   #damit der thread auch wirklich beendet ist
 								
-				thread.start_new_thread(checkChange, (25, iv_path, 10, "keine bewegung")) #1 thread
+				thread.start_new_thread(checkChange, (25, iv_path, "keine bewegung")) #1 thread
 				#time.sleep(30)
 				c = 0
 				while (c<=30):
@@ -158,7 +171,7 @@ def ueberwachen(iv_path):  #main
 					while (gv_stopCheckChangeConfirm == 0):
 						pass
 					
-					thread.start_new_thread(checkChange, (countmax, iv_path, 10, "abbruch/anfang"))
+					thread.start_new_thread(checkChange, (countmax, iv_path, "abbruch/anfang"))
 			
 			#if (gv_checkCardReturn == 2) and (alarmMailSent == 1):  #wenn eine gelbe karte vorgehalten wird, wird der alarm unterbrochen
 				#thread.start_new_thread(checkChange, countmax, iv_path)
