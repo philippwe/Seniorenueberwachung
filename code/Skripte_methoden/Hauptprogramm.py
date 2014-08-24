@@ -9,6 +9,8 @@ gv_stopCheckChangeConfirm = 0
 gv_checkChangeReturn = 0
 gv_checkCardReturn = 0  #0 = nichts, 1=rot, 2=gelb
 
+gv_newImage = 0
+
 gv_deleteImages = 1
 
 def getCheckTime():  #liest den Zeitraum aus, in welcher sich die ueberwachte Person bewegen muss
@@ -47,6 +49,7 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob date
 	global gv_checkChangeReturn
 	global gv_stopCheckChange
 	global gv_deleteImages
+	global gv_newImage
 	
 	gv_stopCheckChange = 0
 	gv_stopCheckChangeConfirm = 0
@@ -65,6 +68,7 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob date
 		if curr_anzahl > anzahl:
 			counter = 0
 			anzahl = curr_anzahl
+			gv_newImage = 1
 		else:
 			counter = counter +1
 			print id+": "+str(counter) #todo noch entfernen
@@ -88,13 +92,15 @@ def checkChange(iv_counter, iv_pfad, iv_deletePeriod, id):  #ueberprueft ob date
 def checkCard(iv_path): #return: 0 = nichts; 1 = rot; 2 = gelb;
 	
 	while (gv_stopCheckCard == 0):
-		path = getNewest(iv_path) #wird der pixelmethode uebergeben
-		#if (pixelmethode == "rot":
-			#gv_checkCardReturn = 1
-		#elseif (pixelmethode == "gelb":)
-			#gv_checkCardReturn = 2	
-		#else:  
-		#	gv_checkCardReturn = 0
+	
+		if (gv_newImage == 1):	
+			path = getNewest(iv_path) #wird der pixelmethode uebergeben
+			#if (pixelmethode == "rot":
+				#gv_checkCardReturn = 1
+			#elseif (pixelmethode == "gelb":)
+				#gv_checkCardReturn = 2	
+			#else:  
+				#gv_checkCardReturn = 0
 
 def ueberwachen(iv_path):  #main
 	
