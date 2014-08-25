@@ -113,6 +113,7 @@ def checkCard(iv_path): #return: 0 = nichts; 1 = rot; 2 = gelb;
 				#gv_checkCardReturn = 2	
 			#else:  
 				#gv_checkCardReturn = 0
+			gv_newImage = 0
 
 def ueberwachen(iv_path):  #main
 	
@@ -188,7 +189,7 @@ def ueberwachen(iv_path):  #main
 					#gv_checkCardReturn = 0
 					#pause = 0
 			
-			#if (gv_checkCardReturn == 1):
+			#if (gv_checkCardReturn == 1): #rote karte
 				#Signalton.output("kontrolle") #muss noch erstellt werden
 				#gv_checkCardReturn = 0
 				#if (gv_checkCardReturn == 1):
