@@ -1,5 +1,6 @@
 ########### globale Variablen 
 
+
 #Auf diese koennen die Methoden zugreifen
 
 gv_stopCheckCard = 0
@@ -21,7 +22,7 @@ def getCheckTime():  #liest den Zeitraum aus, in welcher sich die ueberwachte Pe
 		s.append(line)    
 	fobj.close()
 	
-	countmax = int(s[1].strip())  #entfernt leerzeichen
+	countmax =  int(s[1].strip())  #entfernt leerzeichen
 	return countmax
 
 def getNewest(iv_path):
@@ -30,9 +31,10 @@ def getNewest(iv_path):
 	import glob
 	try:
 		newest = max(glob.iglob(iv_path+"/*.*"), key = os.path.getctime)
+		
 	except ValueError:
 		return 0
-
+	
 	return newest
 
 def checkChange(iv_counter, iv_pfad, id):  #ueberprueft ob dateien dazu gekommen sind und loescht regelmaessig alte bilder
@@ -56,7 +58,7 @@ def checkChange(iv_counter, iv_pfad, id):  #ueberprueft ob dateien dazu gekommen
 	#Ordner auf Veraenderungen ueberpruefen -> bei Bewegung wird ein neues Bild hinzugefuegt
 	while (gv_checkChangeReturn == 0) and (gv_stopCheckChange == 0):
 				
-		time.sleep(1)
+		time.sleep(100)
 		objects = os.listdir(iv_pfad)
 		curr_anzahl = len(objects)
 			
@@ -102,18 +104,23 @@ def periodicCleanup(iv_deletePeriod):
 	return
 
 def checkCard(iv_path): #return: 0 = nichts; 1 = rot; 2 = gelb;
-	
+	import Pixel
+	global gv_newImage
+	global gv_checkCardReturn
 	while (gv_stopCheckCard == 0):
-	
-		if (gv_newImage == 1):	
+		
+		if (gv_newImage == 1):
+			print "Pruefe Bild, leite Pixel.py ein"	
 			path = getNewest(iv_path) #wird der pixelmethode uebergeben
-			#if (pixelmethode == "rot":
-				#gv_checkCardReturn = 1
+			returnCard = Pixel.bildauslesen(path)
+			if returnCard == 1:
+				gv_checkCardReturn = 1
 			#elseif (pixelmethode == "gelb":)
 				#gv_checkCardReturn = 2	
-			#else:  
-				#gv_checkCardReturn = 0
+			else:  
+				gv_checkCardReturn = 0
 			gv_newImage = 0
+			return
 
 def ueberwachen(iv_path):  #main
 	
@@ -123,13 +130,14 @@ def ueberwachen(iv_path):  #main
 	import Email	 #Email.py
 	import Signalton #Signalton.py
 	
+	
 	#Ueberwachungsdauer auslesen
 	countmax = getCheckTime()
 	
 	global gv_stopCheckChange
 	global gv_checkChangeReturn	
 	global gv_stopCheckChangeConfirm
-	
+	global gv_checkCardReturn
 	alarmMailSent = 0	
 	
 	try: 
@@ -138,7 +146,9 @@ def ueberwachen(iv_path):  #main
 		thread.start_new_thread(periodicCleanup, (10,))
 		
 		while True:
-
+			if (gv_checkCardReturn == 1):
+				print "-------- Rotgefunden"
+				break
 			if (gv_checkChangeReturn == 1): #alarm
 				#hier ist der thread fuer checkChange schon durchgelaufen und beendet
 				print "--------------- keine bewegung"
@@ -155,7 +165,7 @@ def ueberwachen(iv_path):  #main
 					c = c+1
 					time.sleep(1)
 					
-				if (gv_checkChangeReturn == 1): #wenn in der Zeit keine Bewegung erfolgt ist
+				if gv_checkChangeReturn == 1: #wenn in der Zeit keine Bewegung erfolgt ist
 					
 					gv_stopCheckChange = 1  #1 thread gestoppt -> 0 threads
 					while (gv_stopCheckChangeConfirm == 0):
