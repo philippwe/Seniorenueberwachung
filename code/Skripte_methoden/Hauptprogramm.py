@@ -23,6 +23,7 @@ def getCheckTime():  #liest den Zeitraum aus, in welcher sich die ueberwachte Pe
 	fobj.close()
 	
 	countmax =  int(s[1].strip())  #entfernt leerzeichen
+	#countmax = countmax * 60
 	return countmax
 
 def getNewest(iv_path):
@@ -33,6 +34,8 @@ def getNewest(iv_path):
 		newest = max(glob.iglob(iv_path+"/*.*"), key = os.path.getctime)
 		
 	except ValueError:
+		return 0
+	except AttributeError:
 		return 0
 	
 	return newest
@@ -58,7 +61,7 @@ def checkChange(iv_counter, iv_pfad, id):  #ueberprueft ob dateien dazu gekommen
 	#Ordner auf Veraenderungen ueberpruefen -> bei Bewegung wird ein neues Bild hinzugefuegt
 	while (gv_checkChangeReturn == 0) and (gv_stopCheckChange == 0):
 				
-		time.sleep(100)
+		time.sleep(1)
 		objects = os.listdir(iv_pfad)
 		curr_anzahl = len(objects)
 			
@@ -105,22 +108,36 @@ def periodicCleanup(iv_deletePeriod):
 
 def checkCard(iv_path): #return: 0 = nichts; 1 = rot; 2 = gelb;
 	import Pixel
+	
 	global gv_newImage
 	global gv_checkCardReturn
+	
 	while (gv_stopCheckCard == 0):
+		try:			
+			if (gv_newImage == 1):
+			
+				#print "Pruefe Bild, leite Pixel.py ein"	
+				path = getNewest(iv_path) #wird der pixelmethode uebergeben
+			
+				if (path !=  0):
+					returnCard = Pixel.bildauslesen(path)
+					if returnCard == 1:
+						gv_checkCardReturn = 1
+						#elseif (pixelmethode == "gelb":)
+						#gv_checkCardReturn = 2	
+						break
+					else:  
+						gv_checkCardReturn = 0
+					
+				gv_newImage = 0
 		
-		if (gv_newImage == 1):
-			print "Pruefe Bild, leite Pixel.py ein"	
-			path = getNewest(iv_path) #wird der pixelmethode uebergeben
-			returnCard = Pixel.bildauslesen(path)
-			if returnCard == 1:
-				gv_checkCardReturn = 1
-			#elseif (pixelmethode == "gelb":)
-				#gv_checkCardReturn = 2	
-			else:  
-				gv_checkCardReturn = 0
-			gv_newImage = 0
-			return
+		except IOError:
+			returnCard = 0			
+		except IndexError:
+			returnCard = 0
+		
+
+	return #es sollte ja nicht nachdem ein bild geprueft wird gleich aus der methode rausgegangen werden. so wird der thread erst beendet, wenn von aussen ein stopCheckCard kommt
 
 def ueberwachen(iv_path):  #main
 	
@@ -146,10 +163,8 @@ def ueberwachen(iv_path):  #main
 		thread.start_new_thread(periodicCleanup, (10,))
 		
 		while True:
-			if (gv_checkCardReturn == 1):
-				print "-------- Rotgefunden"
-				break
-			if (gv_checkChangeReturn == 1): #alarm
+
+			if (gv_checkChangeReturn == 1) and (alarmMailSent == 0): #alarm
 				#hier ist der thread fuer checkChange schon durchgelaufen und beendet
 				print "--------------- keine bewegung"
 				Signalton.output("keineBewegung") #Aufforderung sich zu bewegen
@@ -162,10 +177,15 @@ def ueberwachen(iv_path):  #main
 				c = 0
 				while (c<=30):
 				#	print "t0: "+str(c)
-					c = c+1
 					time.sleep(1)
+					if (gv_checkCardReturn == 1):
+						break #mail verschicken
+					if (gv_checkChangeReturn == 1):
+						break #mail verschicken
+					else:
+						c+=1
 					
-				if gv_checkChangeReturn == 1: #wenn in der Zeit keine Bewegung erfolgt ist
+				if (gv_checkChangeReturn == 1) or (gv_checkCardReturn ==1): #wenn in der Zeit keine Bewegung erfolgt ist
 					
 					gv_stopCheckChange = 1  #1 thread gestoppt -> 0 threads
 					while (gv_stopCheckChangeConfirm == 0):
@@ -178,7 +198,7 @@ def ueberwachen(iv_path):  #main
 					gv_checkChangeReturn = 0  #hier wird nicht mehr auf bewegung ueberprueft, da bereits ein alarm abgeschickt wurde
 				else:
 					gv_stopCheckChange = 1
-					print "gv_stopCheckChange = 1"
+					#print "gv_stopCheckChange = 1"
 					while (gv_stopCheckChangeConfirm == 0):
 						pass
 					
@@ -199,13 +219,16 @@ def ueberwachen(iv_path):  #main
 					#gv_checkCardReturn = 0
 					#pause = 0
 			
-			#if (gv_checkCardReturn == 1): #rote karte
+			if (gv_checkCardReturn == 1) and (alarmMailSent == 0): #rote karte
+				print "-------- Rotgefunden"
 				#Signalton.output("kontrolle") #muss noch erstellt werden
-				#gv_checkCardReturn = 0
-				#if (gv_checkCardReturn == 1):
-					#Email.sendMail()
-					#alarmMailSent = 1
-			
+				if (gv_checkCardReturn == 1):
+					Email.sendMail()
+					alarmMailSent = 1
+				gv_checkCardReturn = 0
+				#gv_stopCheckChange = 1
+				break #kann spaeter entfernt werden. 				
+
 	except KeyboardInterrupt:
 		print ("Programm beendet")
 		#Signalton.output("programmBeendet") TODO

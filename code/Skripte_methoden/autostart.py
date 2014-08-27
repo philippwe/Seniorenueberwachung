@@ -15,4 +15,9 @@ path = "/srv/motion/"
 delete.cleanAll(path)
 
 #2.) Ordnerpruefen ausfuehren
-Hauptprogramm.ueberwachen(path)
+try:
+
+	Hauptprogramm.ueberwachen(path)
+
+except KeyboardInterrupt:
+	print "Programm beendet"
