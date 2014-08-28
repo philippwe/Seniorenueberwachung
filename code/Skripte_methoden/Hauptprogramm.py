@@ -228,7 +228,7 @@ def ueberwachen(iv_path):  #main
 				gv_checkCardReturn = 0
 				#gv_stopCheckChange = 1
 				break #kann spaeter entfernt werden. 				
-
+		time.sleep(10)
 	except KeyboardInterrupt:
 		print ("Programm beendet")
 		#Signalton.output("programmBeendet") TODO
