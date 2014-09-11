@@ -18,7 +18,7 @@ def bildauslesen(iv_path): #Todo: richtigen Pfad uebergeben
     im = Image.open(iv_path)
     pix = im.load()
     zielfarbe = [135,31,30]
-    
+  #  zielfarbe = [255,90,100]
     
     # Auf Basis des Referenz-RGB-Wert werden Intervalle berechnet.
     zielfarberotmax = zielfarbe[0]+100
@@ -80,7 +80,7 @@ def bildauslesen(iv_path): #Todo: richtigen Pfad uebergeben
                     if zielfarberotmin < rot < zielfarberotmax and zielfarbegrunmin < grun < zielfarbegrunmax and zielfarbeblaumin < blau < zielfarbeblaumax:
                        
                         z11 = z11+1
-                        if z11 == 30:
+                        if z11 == 20:
                             break
     
                     z1=z1+1
@@ -93,19 +93,19 @@ def bildauslesen(iv_path): #Todo: richtigen Pfad uebergeben
                     if zielfarberotmin < rot < zielfarberotmax and zielfarbegrunmin < grun < zielfarbegrunmax and zielfarbeblaumin < blau < zielfarbeblaumax:
         
                         z12 =z12+1
-                        if z12 == 30 and z11 == 30:
+                        if z12 == 20 and z11 == 20:
                             #print "raus1"
                             break
                    
                  
                     z2 =z2+1
-                if z12 == 30 and z11 == 30:
+                if z12 == 20 and z11 == 20:
                     #print "raus 2"
                     break
               
     # os.system("Signalton.py 1")
             currpos_wide=currpos_wide+10
-       	if z12 ==30 and z11 ==30:
+       	if z12 ==20 and z11 ==20:
             gv_redcard = 1
             print "Wir gehen raus!"
 	    return 1

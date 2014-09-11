@@ -32,7 +32,7 @@ def cleanup(iv_period):
                             day = 29
                         else:
                             day = 28
-                        #schaltjahre!!!
+                        #schaltjahre
                 elif (month-1)==3:
                         day = 31
                 elif (month-1)==4:
@@ -82,5 +82,4 @@ def cleanAll(pfad):
     import glob
     import os
     for fl in glob.glob(pfad+"*.jpg"):
-    #Do what you want with the file
-        os.remove(fl)
+    	os.remove(fl)
